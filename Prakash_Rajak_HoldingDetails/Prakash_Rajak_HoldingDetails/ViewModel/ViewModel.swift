@@ -28,9 +28,7 @@ final class ViewModel {
 
     func fetchHoldings() {
         onStateChange?(.loading)
-        ProgressView.shared.showProgress()
         responseFetchCase.execute { [weak self] result in
-            ProgressView.shared.hideProgress()
             DispatchQueue.main.async {
                 switch result {
                 case .success(let holdings):
@@ -70,18 +68,5 @@ final class ViewModel {
             todayPNL: todayPNL,
             totalPNL: totalPNL
         )
-    }
-    
-    func showAlert(title: String, message: String, on viewController: UIViewController, retryCallback: @escaping () -> ()) {
-        let alert = UIAlertController(
-            title: title,
-            message: message,
-            preferredStyle: .alert
-        )
-        let okAction = UIAlertAction(title: "Retry", style: .default) {_ in
-            retryCallback()
-        }
-        alert.addAction(okAction)
-        viewController.present(alert, animated: true)
     }
 }

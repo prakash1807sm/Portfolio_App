@@ -135,6 +135,7 @@ class ViewController: UIViewController {
         model.onStateChange = { [weak self] (state : State) in
             guard let self else { return }
             if case .loaded = state {
+                ProgressView.shared.hideProgress()
                 self.tableView.reloadData()
                 self.summaryView.configure(
                     summary: self.model.portfolioSummary(),
@@ -148,11 +149,12 @@ class ViewController: UIViewController {
                 )
                 setBottomSuperArea()
             } else if case .error(let error) = state {
-                model.showAlert(title: "Error", message: error, on : self) {
+                ProgressView.shared.hideProgress()
+                showAlert(title: "Error", message: error, on : self) {
                     self.model.fetchHoldings()
                 }
             } else {
-                
+                ProgressView.shared.showProgress()
             }
         }
     }
@@ -173,6 +175,19 @@ class ViewController: UIViewController {
                 self.expandedProfileSummaryView.isHidden = !self.model.isSummaryExpanded
             }
         }
+    }
+    
+    func showAlert(title: String, message: String, on viewController: UIViewController, retryCallback: @escaping () -> ()) {
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert
+        )
+        let okAction = UIAlertAction(title: "Retry", style: .default) {_ in
+            retryCallback()
+        }
+        alert.addAction(okAction)
+        viewController.present(alert, animated: true)
     }
 }
 
