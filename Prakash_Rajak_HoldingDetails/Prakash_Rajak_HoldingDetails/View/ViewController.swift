@@ -17,6 +17,9 @@ class ViewController: UIViewController {
     private let model: ViewModel = ViewModel(responseFetchCase: FetchHoldingResponseForApi(apiManager: ApiManager()))
     
     private let expandedProfileSummaryView = ExpandedPortfolioSummaryView()
+    
+    private var tvBottomConstraintFromSummary: NSLayoutConstraint!
+    private var tvBottomConstraintFromExpanded: NSLayoutConstraint!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,8 +63,8 @@ class ViewController: UIViewController {
     
     private func setupUI() {
         addSummaryView()
-        addTableView()
         addExpandedProfileSummaryView()
+        addTableView()
     }
     
     
@@ -105,21 +108,6 @@ class ViewController: UIViewController {
         ])
     }
     
-    func addTableView() {
-        tableView.register(HoldingCell.self, forCellReuseIdentifier: "cell")
-        tableView.dataSource = self
-        tableView.separatorStyle = .none
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(tableView)
-        
-        NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: portfolioTypeView.bottomAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: summaryView.topAnchor)
-        ])
-    }
-    
     func addExpandedProfileSummaryView() {
         expandedProfileSummaryView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(expandedProfileSummaryView)
@@ -129,6 +117,24 @@ class ViewController: UIViewController {
             expandedProfileSummaryView.bottomAnchor.constraint(equalTo: summaryView.topAnchor),
         ])
         expandedProfileSummaryView.isHidden = true
+    }
+    
+    func addTableView() {
+        tableView.register(HoldingCell.self, forCellReuseIdentifier: "cell")
+        tableView.dataSource = self
+        tableView.separatorStyle = .none
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        tvBottomConstraintFromSummary = tableView.bottomAnchor.constraint(equalTo: summaryView.topAnchor)
+        tvBottomConstraintFromExpanded = tableView.bottomAnchor.constraint(equalTo: expandedProfileSummaryView.topAnchor)
+        
+        view.addSubview(tableView)
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: portfolioTypeView.bottomAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tvBottomConstraintFromSummary
+        ])
     }
 
     private func setupStateChangeCallback() {
@@ -172,6 +178,14 @@ class ViewController: UIViewController {
                 expanded: self.model.isSummaryExpanded
             )
             UIView.transition(with: self.view, duration: 0.25, options: .transitionCrossDissolve) {
+                if self.model.isSummaryExpanded {
+                    self.tvBottomConstraintFromSummary.isActive = false
+                    self.tvBottomConstraintFromExpanded.isActive = true
+                } else {
+                    self.tvBottomConstraintFromExpanded.isActive = false
+                    self.tvBottomConstraintFromSummary.isActive = true
+                }
+                self.view.layoutIfNeeded()
                 self.expandedProfileSummaryView.isHidden = !self.model.isSummaryExpanded
             }
         }
