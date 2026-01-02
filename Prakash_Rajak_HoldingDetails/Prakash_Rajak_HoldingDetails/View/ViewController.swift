@@ -22,9 +22,6 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         addStatusBarColor()
-//        summaryView.layer.cornerRadius = 8 //Todo
-//        summaryView.layer.borderWidth = 1
-//        summaryView.layer.borderColor = UIColor.gray.withAlphaComponent(0.5).cgColor
         setTopBarView()
         addPortfolioTypeView()
         setupUI()
